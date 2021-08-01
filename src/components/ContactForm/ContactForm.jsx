@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { addContact } from '../../redux/contacts/contact-actions';
+import { addContact, phonebookSelectors } from '../../redux/phonebook';
 import PropTypes from 'prop-types';
 
 import s from './ContactForm.module.css';
@@ -31,16 +31,26 @@ class ContactForm extends Component {
   handleSubmit = e => {
     e.preventDefault();
 
+    console.log(this.state);
+
     const { name, number } = this.state;
     const { contactList, onSubmit } = this.props;
 
-    contactList.some(
-      contact => name.toLowerCase() === contact.name.toLowerCase(),
-    )
-      ? alert(`${name} is already in contacts.`)
-      : onSubmit(name, number);
+    if (
+      contactList.some(
+        contact => name.toLowerCase() === contact.name.toLowerCase(),
+      )
+    ) {
+      alert(`${name} is already in contacts.`);
+      return;
+    }
+    if (contactList.some(contact => number === contact.number)) {
+      alert(`${number} is already in contacts.`);
+      return;
+    }
 
-    this.setState({ name: '', number: '' });
+    onSubmit(this.state);
+    // this.setState({ name: '', number: '' });
     this.reset();
   };
 
@@ -86,7 +96,7 @@ class ContactForm extends Component {
 }
 
 const mapStateToProps = state => ({
-  contactList: state.contacts.items,
+  contactList: phonebookSelectors.getAllContacts(state),
 });
 
 const mapDispatchToProps = dispatch => ({
